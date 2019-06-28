@@ -7,7 +7,8 @@ PKI. If you are rolling out your own OpenVPN server, this could be the first ste
 Requirements
 ------------
 For CentOS, EPEL repository must be enabled. You can do it using
-bngsudheer.centos_base or another means.
+[bngsudheer.centos_base](https://galaxy.ansible.com/bngsudheer/centos_base) or
+another means.
 
 In order to build a CA server and an OpenVPN server using gavika.easy_rsa and
 gavika.openvpn, you have to execute the roles a few times depending on your
