@@ -1,0 +1,71 @@
+---
+- name: Stat downloaded archive
+  stat:
+    path: /home/easyrsa/Downloads/EasyRSA-unix-v3.0.6.tgz
+  register: stat_easy_rsa_archive
+
+- name: Downloads directory
+  file:
+    path: /home/easyrsa/Downloads
+    owner: easyrsa
+    group: easyrsa
+    state: directory
+
+- name: Download EasyRSA
+  get_url:
+    url: https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz
+    dest: /home/easyrsa/Downloads/
+    owner: easyrsa
+    group: easyrsa
+  register: download_easyrsa
+  when: not stat_easy_rsa_archive.stat.exists
+
+- name: Extract EasyRSA
+  unarchive:
+    src: /home/easyrsa/Downloads/EasyRSA-unix-v3.0.6.tgz
+    dest: /home/easyrsa/Downloads/
+    group: easyrsa
+    owner: easyrsa
+    remote_src: true
+  when: download_easyrsa.changed
+  tags:
+    - skip_ansible_lint
+
+- name: Easyrsa shared directory
+  file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0755
+  loop:
+    - /usr/share/easy-rsa/
+    - /usr/share/easy-rsa/3/
+
+- name: Copy EasyRSA binary to share location
+  copy:
+    src: "/home/easyrsa/Downloads/EasyRSA-v3.0.6/{{ item }}"
+    dest: /usr/share/easy-rsa/3/
+    remote_src: true
+  loop:
+    - easyrsa
+    - openssl-easyrsa.cnf
+    - x509-types
+
+- name: File permissions
+  file:
+    path: "{{ item }}"
+    mode: 0755
+  loop:
+    - /usr/share/easy-rsa/3/easyrsa
+
+- name: Install python-apt
+  apt:
+    name:
+      - python-apt
+      - rsync
+
+- name: Install pexpect
+  apt:
+    name:
+      - python3-pexpect
+    update_cache: true
+    force_apt_get: true

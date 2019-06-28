@@ -1,0 +1,19 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    - centos_base_enable_epel: true
+    - easy_rsa_ca_server_mode: true
+    - easy_rsa_local_pool_directory: /tmp/easy_rsa_docket_test
+  pre_tasks:
+    - name: pexpect
+      apt:
+        name:
+          - python-pexpect
+          - rsync
+        update_cache: true
+      when: ansible_distribution == 'Ubuntu'
+  roles:
+    - role: bngsudheer.centos_base
+      when: ansible_distribution == 'CentOS'
+    - role: easy_rsa

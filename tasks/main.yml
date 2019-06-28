@@ -1,0 +1,265 @@
+---
+- name: Prepare directories in local pool
+  file:
+    path: "{{ easy_rsa_local_pool_directory }}/{{ item }}/"
+    state: directory
+  delegate_to: 127.0.0.1
+  loop:
+    - server
+    - client
+    - issued/server
+    - issued/client
+    - crl
+  become: false
+
+- name: EasyRSA user
+  user:
+    name: easyrsa
+    shell: /bin/bash
+
+- name: CA server pool direcotry
+  file:
+    path: "{{ easy_rsa_pool_directory }}/{{ item }}"
+    state: directory
+    owner: easyrsa
+    group: easyrsa
+  loop:
+    - client
+    - server
+
+- name: Working directory
+  file:
+    path: /home/easyrsa/easyrsa
+    state: directory
+    owner: easyrsa
+    group: easyrsa
+
+- name: Install EasyRSA - CentOS
+  include_tasks: install_el.yml
+  when: ansible_distribution == 'CentOS'
+
+- name: Install EasyRSA - Ubuntu
+  include_tasks: install_ubuntu.yml
+  when: ansible_distribution == 'Ubuntu'
+
+- name: EasyRSA vars template
+  template:
+    src: vars
+    dest: /home/easyrsa/easyrsa/vars
+    owner: easyrsa
+    group: easyrsa
+
+- name: Stat the pki directory
+  stat:
+    path: /home/easyrsa/easyrsa/pki
+  register: result_stat_pki
+
+- name: easyrsa bin path
+  set_fact:
+    easyrsa_bin: /usr/share/easy-rsa/3/easyrsa
+
+- name: Initialize PKI
+  command: "{{ easyrsa_bin }} init-pki"
+  args:
+    chdir: /home/easyrsa/easyrsa/
+  when: not result_stat_pki.stat.exists
+  become: true
+  become_user: easyrsa
+
+- name: Delete revocation client requests in local pool
+  file:
+    path: "{{ easy_rsa_local_pool_directory }}/client/{{ item }}.req"
+    state: absent
+  delegate_to: 127.0.0.1
+  loop: "{{ easy_rsa_revoke_clients }}"
+  become: false
+
+- name: Stat ca.crt
+  stat:
+    path: /home/easyrsa/easyrsa/pki/ca.crt
+  register: result_stat_ca_cert
+
+- name: Build CA
+  expect:
+    command: "{{ easyrsa_bin }} build-ca nopass"
+    chdir: /home/easyrsa/easyrsa/
+    responses:
+      (.*)Common Name(.*): ""
+  become: true
+  become_user: easyrsa
+  when:
+    - not result_stat_ca_cert.stat.exists
+    - easy_rsa_ca_server_mode|bool
+
+- name: Stat server request on local pool
+  stat:
+    path: "{{ easy_rsa_local_pool_directory }}/server/{{ easy_rsa_server_request_to_import }}"
+  register: result_stat_server_request_local_pool
+  delegate_to: 127.0.0.1
+  become: false
+
+- name: Upload server request to CA server
+  copy:
+    src: "{{ easy_rsa_local_pool_directory }}/server/{{ easy_rsa_server_request_to_import }}"
+    dest: "{{ easy_rsa_pool_directory }}/server/"
+    mode: 0700
+  become: true
+  become_user: easyrsa
+  when:
+    - easy_rsa_ca_server_mode|bool
+    - easy_rsa_server_request_to_import | length > 0
+    - result_stat_server_request_local_pool.stat.exists
+  register: result_upload_server_request
+
+- name: Stat server reqeust in temporary pool
+  stat:
+    path: "{{ easy_rsa_pool_directory }}/server/{{ easy_rsa_server_request_to_import }}"
+  become: true
+  become_user: easyrsa
+  register: result_stat_server_request_pool
+
+- name: Stat server reqeust
+  stat:
+    path: "/home/easyrsa/easyrsa/pki/reqs/{{ easy_rsa_server_request_to_import }}"
+  become: true
+  become_user: easyrsa
+  register: result_stat_server_request
+
+- name: Import server reqeust
+  command: "{{ easyrsa_bin }} import-req {{ easy_rsa_pool_directory }}/server/{{ easy_rsa_server_request_to_import }} server"
+  args:
+    chdir: /home/easyrsa/easyrsa/
+  become: true
+  become_user: easyrsa
+  register: result_import_server_request
+  when:
+    - easy_rsa_ca_server_mode|bool
+    - not result_stat_server_request.stat.exists
+    - result_stat_server_request_pool.stat.exists
+
+- name: Sign server reqeust
+  expect:
+    command: "{{ easyrsa_bin }} sign-req server server"
+    chdir: /home/easyrsa/easyrsa/
+    responses:
+      (.*)Confirm request details(.*): "yes"
+  become: true
+  become_user: easyrsa
+  when:
+    - result_import_server_request.changed
+    - easy_rsa_ca_server_mode|bool
+  register: result_sign_server_request
+  tags:
+    - skip_ansible_lint
+
+- name: Fetch issued server certificate
+  fetch:
+    src: /home/easyrsa/easyrsa/pki/issued/server.crt
+    dest: "{{ easy_rsa_local_pool_directory }}/issued/server/"
+    flat: true
+  when: result_sign_server_request.changed
+  tags:
+    - skip_ansible_lint
+
+- name: Stat ca certificate
+  stat:
+    path: /home/easyrsa/easyrsa/pki/ca.crt
+  register: result_stat_ca_crt
+
+- name: Fetch ca certificate
+  fetch:
+    src: /home/easyrsa/easyrsa/pki/ca.crt
+    dest: "{{ easy_rsa_local_pool_directory }}/"
+    flat: true
+  when:
+    - result_stat_ca_crt.stat.exists
+    - easy_rsa_ca_server_mode|bool
+
+- name: Upload client certificate requests
+  synchronize:
+    dest: "{{ easy_rsa_pool_directory }}/client/"
+    src: "{{ easy_rsa_local_pool_directory }}/client/"
+    archive: false
+    rsync_opts:
+      - "--include=*.req"
+  register: result_synchronize_client_requests
+  when:
+    - easy_rsa_ca_server_mode|bool
+  become: true
+  become_user: easyrsa
+
+- name: Find client certificate requests
+  find:
+    paths: "{{ easy_rsa_pool_directory }}/client/"
+    patterns: "*.req"
+  register: result_find_client_certificate_requests
+
+- name: Stat list of client requests to import
+  stat:
+    path: "/home/easyrsa/easyrsa/pki/reqs/{{ item.path|basename }}"
+  loop: "{{ result_find_client_certificate_requests.files }}"
+  register: result_stat_client_requests
+
+- name: Build list of client requets to import
+  set_fact:
+    easy_rsa_client_requests_to_import: "{{ easy_rsa_client_requests_to_import }} + [ '{{ item.item.path }}']"
+  loop: "{{ result_stat_client_requests.results }}"
+  when: not item.stat.exists
+
+- name: Import client reqeusts
+  command: "{{ easyrsa_bin }} import-req {{ item }} {{ (item|basename|splitext)[0] }}"
+  args:
+    chdir: /home/easyrsa/easyrsa/
+  become: true
+  become_user: easyrsa
+  when:
+    - easy_rsa_ca_server_mode|bool
+  loop: "{{ easy_rsa_client_requests_to_import }}"
+  register: result_import_client_requests
+
+- name: Sign client reqeusts
+  expect:
+    command: "{{ easyrsa_bin }} sign-req client {{ (item.item|basename|splitext)[0] }}"
+    chdir: /home/easyrsa/easyrsa/
+    responses:
+      (.*)Confirm request details(.*): "yes"
+  become: true
+  become_user: easyrsa
+  when:
+    - easy_rsa_ca_server_mode|bool
+  loop: "{{ result_import_client_requests.results }}"
+  register: result_sign_client_request
+
+- name: Find the client certificates to fetch
+  find:
+    paths: /home/easyrsa/easyrsa/pki/issued/
+    patterns: "*.crt"
+    excludes: "server.crt"
+  register: result_find_client_certificates
+
+- name: Fetch issued client cetificates
+  fetch:
+    src: "{{ item.path }}"
+    dest: "{{ easy_rsa_local_pool_directory }}/issued/client/"
+    flat: true
+  loop: "{{ result_find_client_certificates.files }}"
+  when:
+    - easy_rsa_ca_server_mode|bool
+
+- name: Check whether the client to be reokved has a valid certificate
+  include_tasks: revoke.yml
+  loop: "{{ easy_rsa_revoke_clients }}"
+  loop_control:
+    loop_var: outer_item
+
+- name: Stat client revocation list
+  stat:
+    path: /home/easyrsa/easyrsa/pki/crl.pem
+  register: result_stat_crl
+
+- name: Fetch client revocation list
+  fetch:
+    src: /home/easyrsa/easyrsa/pki/crl.pem
+    dest: "{{ easy_rsa_local_pool_directory }}/crl/"
+    flat: true
+  when: result_stat_crl.stat.exists

@@ -1,0 +1,21 @@
+---
+language: python
+services: docker
+sudo: required
+
+env:
+  global:
+    - ROLE_NAME: easy_rsa
+  matrix:
+    # Test defaults.
+    - MOLECULE_DISTRO: centos7
+    - MOLECULE_DISTRO: ubuntu1804
+
+install:
+  - pip install molecule docker testinfra
+
+script:
+  - molecule test
+
+notifications:
+webhooks: https://galaxy.ansible.com/api/v1/notifications/

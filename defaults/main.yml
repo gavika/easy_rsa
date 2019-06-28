@@ -1,0 +1,41 @@
+---
+# Vars in EasyRSA
+# Your country
+easy_rsa_req_country: ""
+
+# Your province
+easy_rsa_req_province: ""
+
+# Your city
+easy_rsa_req_city: ""
+
+# Your organization
+easy_rsa_req_org: ""
+
+# Your email
+easy_rsa_req_email: ""
+
+# Your organization unit
+easy_rsa_req_ou: ""
+
+# The temporary pool directoy
+# No trailing /
+easy_rsa_pool_directory: "/tmp/ca_openvpn_pool"
+
+# The temporary pool directory on the controller machine, the machine on which
+# ansible-playbook is executed
+# No trailing /
+easy_rsa_local_pool_directory: "/tmp/ca_openvpn_pool"
+
+# The server request to import, something like server.req
+easy_rsa_server_request_to_import: "server.req"
+
+# The easyRSA server mode. true for CA server, false for openvpn server
+easy_rsa_ca_server_mode: false
+
+# client requests to import. Example ['client1', 'client2']
+easy_rsa_client_requests_to_import: []
+
+# List of clients to revoke
+easy_rsa_revoke_clients: []
+easy_rsa_revoke_clients_filtered: []

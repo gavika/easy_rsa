@@ -1,0 +1,12 @@
+---
+- name: Install EasyRSA and dependencies
+  yum:
+    name:
+      - easy-rsa
+      - python2-pip
+      - rsync
+
+- name: Install pexpect via pip
+  pip:
+    name:
+      - pexpect>=3.3

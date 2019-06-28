@@ -1,0 +1,26 @@
+---
+- name: Check whether the client to be reokved has a valid certificate
+  stat:
+    path: "/home/easyrsa/easyrsa/pki/issued/{{ outer_item }}.crt"
+  register: result_stat_revoke_client
+
+- name: Revoke the client
+  expect:
+    command: "{{ easyrsa_bin }} revoke {{ outer_item }}"
+    chdir: /home/easyrsa/easyrsa/
+    responses:
+      (.*)Continue with revocation:(.*): "yes"
+  become: true
+  become_user: easyrsa
+  when: result_stat_revoke_client.stat.exists
+  register: result_revoke_client
+
+- name: Generate crl
+  command: "{{ easyrsa_bin }} gen-crl"
+  args:
+    chdir: /home/easyrsa/easyrsa/
+  when: result_revoke_client.changed
+  become: true
+  become_user: easyrsa
+  tags:
+    - skip_ansible_lint
