@@ -57,10 +57,9 @@
   loop:
     - /usr/share/easy-rsa/3/easyrsa
 
-- name: Install python-apt
+- name: Install rsync
   apt:
     name:
-      - python-apt
       - rsync
 
 - name: Install pexpect
