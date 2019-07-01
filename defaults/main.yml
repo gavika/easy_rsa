@@ -1,4 +1,10 @@
 ---
+# Internal variables
+# client requests to import. Example ['client1', 'client2']
+easy_rsa_client_requests_to_import: []
+
+# End of internal variables
+
 # Vars in EasyRSA
 # Your country
 easy_rsa_req_country: ""
@@ -32,9 +38,6 @@ easy_rsa_server_request_to_import: "server.req"
 
 # The easyRSA server mode. true for CA server, false for openvpn server
 easy_rsa_ca_server_mode: false
-
-# client requests to import. Example ['client1', 'client2']
-easy_rsa_client_requests_to_import: []
 
 # List of clients to revoke
 easy_rsa_revoke_clients: []

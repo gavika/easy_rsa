@@ -17,12 +17,21 @@
     name: easyrsa
     shell: /bin/bash
 
+- name: CA server pool direcotry top level directoy
+  file:
+    path: "{{ easy_rsa_pool_directory }}"
+    state: directory
+    owner: easyrsa
+    group: easyrsa
+    mode: 0766
+
 - name: CA server pool direcotry
   file:
     path: "{{ easy_rsa_pool_directory }}/{{ item }}"
     state: directory
     owner: easyrsa
     group: easyrsa
+    mode: 0766
   loop:
     - client
     - server
@@ -179,7 +188,10 @@
   synchronize:
     dest: "{{ easy_rsa_pool_directory }}/client/"
     src: "{{ easy_rsa_local_pool_directory }}/client/"
-    archive: false
+    archive: true
+    perms: false
+    owner: false
+    group: false
     rsync_opts:
       - "--include=*.req"
   register: result_synchronize_client_requests
