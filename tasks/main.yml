@@ -17,7 +17,7 @@
     name: easyrsa
     shell: /bin/bash
 
-- name: CA server pool direcotry top level directoy
+- name: CA server pool top level directory
   file:
     path: "{{ easy_rsa_pool_directory }}"
     state: directory
