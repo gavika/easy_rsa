@@ -1,5 +1,5 @@
 ---
-- name: Check whether the client to be reokved has a valid certificate
+- name: Check whether the client to be revoked has a valid certificate
   stat:
     path: "/home/easyrsa/easyrsa/pki/issued/{{ outer_item }}.crt"
   register: result_stat_revoke_client
