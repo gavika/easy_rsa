@@ -1,8 +1,10 @@
 Easy-RSA
 =========
+
 This Ansible role installs and configures EasyRSA. Use this role to create your
 PKI. If you are rolling out your own OpenVPN server, this could be the first step.
 
+https://www.techchorus.net/blog/run-your-own-openvpn-server/
 
 Requirements
 ------------
@@ -67,8 +69,8 @@ Author Information
 
 Sudheera Satyanarayana
 
-Gavika
-* https://www.gavika.com
+
+* Gavika: https://www.gavika.com
 
 * Blog: https://www.techchorus.net
 * Twitter: https://www.twitter.com/bngsudheer
