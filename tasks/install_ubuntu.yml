@@ -1,4 +1,13 @@
 ---
+- name: Install packages
+  apt:
+    name:
+      - python3-pexpect
+      - rsync
+      - acl
+    update_cache: true
+    force_apt_get: true
+
 - name: Stat downloaded archive
   stat:
     path: /home/easyrsa/Downloads/EasyRSA-unix-v3.0.6.tgz
@@ -40,7 +49,7 @@
     - /usr/share/easy-rsa/
     - /usr/share/easy-rsa/3/
 
-- name: Copy EasyRSA binary to share location
+- name: Copy EasyRSA binary to shared location
   copy:
     src: "/home/easyrsa/Downloads/EasyRSA-v3.0.6/{{ item }}"
     dest: /usr/share/easy-rsa/3/
@@ -56,15 +65,3 @@
     mode: 0755
   loop:
     - /usr/share/easy-rsa/3/easyrsa
-
-- name: Install rsync
-  apt:
-    name:
-      - rsync
-
-- name: Install pexpect
-  apt:
-    name:
-      - python3-pexpect
-    update_cache: true
-    force_apt_get: true
