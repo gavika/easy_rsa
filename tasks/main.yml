@@ -120,14 +120,14 @@
     - result_stat_server_request_local_pool.stat.exists
   register: result_upload_server_request
 
-- name: Stat server reqeust in temporary pool
+- name: Stat server request in temporary pool
   stat:
     path: "{{ easy_rsa_pool_directory }}/server/{{ easy_rsa_server_request_to_import }}"
   become: true
   become_user: easyrsa
   register: result_stat_server_request_pool
 
-- name: Stat server reqeust
+- name: Stat server request
   stat:
     path: "/home/easyrsa/easyrsa/pki/reqs/{{ easy_rsa_server_request_to_import }}"
   become: true
