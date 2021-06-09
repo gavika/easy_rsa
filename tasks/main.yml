@@ -25,7 +25,7 @@
     group: easyrsa
     mode: 0766
 
-- name: CA server pool direcotry
+- name: CA server pool directory
   file:
     path: "{{ easy_rsa_pool_directory }}/{{ item }}"
     state: directory
