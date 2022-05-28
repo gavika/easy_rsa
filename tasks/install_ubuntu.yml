@@ -22,7 +22,7 @@
 
 - name: Download EasyRSA
   get_url:
-    url: https://github.com/OpenVPN/easy-rsa/releases/download/v3.0.6/EasyRSA-unix-v3.0.6.tgz
+    url: "{{ easy_rsa_download_url }}"
     dest: /home/easyrsa/Downloads/
     owner: easyrsa
     group: easyrsa
@@ -31,7 +31,7 @@
 
 - name: Extract EasyRSA
   unarchive:
-    src: /home/easyrsa/Downloads/EasyRSA-unix-v3.0.6.tgz
+    src: "/home/easyrsa/Downloads/EasyRSA-{{ easy_rsa_numeric_version }}.tgz"
     dest: /home/easyrsa/Downloads/
     group: easyrsa
     owner: easyrsa
@@ -51,7 +51,7 @@
 
 - name: Copy EasyRSA binary to shared location
   copy:
-    src: "/home/easyrsa/Downloads/EasyRSA-v3.0.6/{{ item }}"
+    src: "/home/easyrsa/Downloads/EasyRSA-{{ easy_rsa_numeric_version }}/{{ item }}"
     dest: /usr/share/easy-rsa/3/
     remote_src: true
   loop:

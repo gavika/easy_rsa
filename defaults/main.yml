@@ -42,3 +42,7 @@ easy_rsa_ca_server_mode: false
 # List of clients to revoke
 easy_rsa_revoke_clients: []
 easy_rsa_revoke_clients_filtered: []
+easy_rsa_version: "v3.1.0"
+easy_rsa_numeric_version: "3.1.0"
+
+easy_rsa_download_url: "http
