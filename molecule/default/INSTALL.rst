@@ -1,16 +1,15 @@
 *******
-Docker driver installation guide
+Delegated driver installation guide
 *******
 
 Requirements
 ============
 
-* General molecule dependencies (see https://molecule.readthedocs.io/en/latest/installation.html)
-* Docker Engine
-* docker-py
-* docker
+This driver is delegated to the developer.  Up to the developer to implement
+requirements.
 
 Install
 =======
 
-    $ sudo pip install docker-py
+This driver is delegated to the developer.  Up to the developer to implement
+requirements.

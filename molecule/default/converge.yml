@@ -1,0 +1,7 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include easy_rsa"
+      include_role:
+        name: "easy_rsa"

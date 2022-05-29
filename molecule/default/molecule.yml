@@ -1,30 +1,11 @@
 ---
 dependency:
   name: galaxy
-  options:
-    role-file: requirements.yml
-    ignore-errors: false
 driver:
-  name: docker
-lint: |
-  yamllint .
+  name: delegated
 platforms:
   - name: instance
-    image: "geerlingguy/docker-${MOLECULE_DISTRO:-centos7}-ansible:latest"
-    privileged: true
-    pre_build_image: true
-    capabilities:
-      - SYS_ADMIN
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-    command: ${MOLECULE_DOCKER_COMMAND:-""}
 provisioner:
   name: ansible
-  lint: |
-    ansible-lint
-scenario:
-  name: default
 verifier:
-  name: testinfra
-  options:
-    verbose: true
+  name: ansible
