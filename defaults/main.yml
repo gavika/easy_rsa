@@ -45,4 +45,4 @@ easy_rsa_revoke_clients_filtered: []
 easy_rsa_version: "v3.1.0"
 easy_rsa_numeric_version: "3.1.0"
 
-easy_rsa_download_url: "http
+easy_rsa_download_url: "https://github.com/OpenVPN/easy-rsa/releases/download/v3.1.0/EasyRSA-3.1.0.tgz"
