@@ -65,7 +65,7 @@
 
 - name: easyrsa bin path
   set_fact:
-    easyrsa_bin: /usr/share/easy-rsa/3/easyrsa
+    easyrsa_bin: /usr/share/easy-rsa/easyrsa
 
 - name: Initialize PKI
   command: "{{ easyrsa_bin }} init-pki"
