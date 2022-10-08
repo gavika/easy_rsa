@@ -5,6 +5,6 @@
       - python3-pexpect
       - rsync
       - acl
-      - easy_rsa
+      - easy-rsa
     update_cache: true
     force_apt_get: true
