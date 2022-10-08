@@ -214,7 +214,8 @@
 
 - name: Build list of client requets to import
   set_fact:
-    easy_rsa_client_requests_to_import: "{{ easy_rsa_client_requests_to_import }} + [ '{{ item.item.path }}']"
+    easy_rsa_client_requests_to_import: "{{ (easy_rsa_client_requests_to_import | default([]) ) + [item.item.path] }}"
+
   loop: "{{ result_stat_client_requests.results }}"
   when: not item.stat.exists
 

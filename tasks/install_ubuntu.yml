@@ -6,5 +6,6 @@
       - rsync
       - acl
       - easy-rsa
+      - tree
     update_cache: true
     force_apt_get: true

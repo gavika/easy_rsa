@@ -6,6 +6,9 @@ easy_rsa_client_requests_to_import: []
 # End of internal variables
 
 # Vars in EasyRSA
+
+easyrsa_bin: /usr/share/easy-rsa/easyrsa
+
 # Your country
 easy_rsa_req_country: ""
 
